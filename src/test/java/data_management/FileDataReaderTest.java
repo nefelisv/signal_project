@@ -22,7 +22,7 @@ public class FileDataReaderTest {
             writer.write("1,98.6,BloodPressure,123450000000\n");
         }
 
-        DataStorage storage = new DataStorage();
+        DataStorage storage = DataStorage.getInstance();
         FileDataReader reader = new FileDataReader(tempDr.getPath());
         reader.readData(storage);
 

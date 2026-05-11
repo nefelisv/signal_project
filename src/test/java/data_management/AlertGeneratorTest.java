@@ -17,7 +17,7 @@ public class AlertGeneratorTest {
     void testCriticalSystolicBloodPressure(){
         Patient patient = new Patient(1);
         patient.addRecord(185.0, "SystolicPressure", 1000);
-        AlertGenerator generator = new AlertGenerator(new DataStorage());
+        AlertGenerator generator = new AlertGenerator(DataStorage.getInstance());
         List <Alert> alerts = generator.getTriggeredAlerts();
         generator.evaluateData(patient);
         assertTrue(alerts.stream().anyMatch( a-> a.getCondition().equals("Critical Systolic Blood Pressure")));
@@ -28,7 +28,7 @@ public class AlertGeneratorTest {
     void testCriticalDiastolicBloodPressure(){
         Patient patient = new Patient(1);
         patient.addRecord(125.0, "DiastolicPressure", 1000);
-        AlertGenerator generator = new AlertGenerator(new DataStorage());
+        AlertGenerator generator = new AlertGenerator(DataStorage.getInstance());
          generator.evaluateData(patient);
         List <Alert> alerts = generator.getTriggeredAlerts();
         assertTrue(alerts.stream().anyMatch( a-> a.getCondition().equals("Critical Diastolic Blood Pressure")));
@@ -39,7 +39,7 @@ public class AlertGeneratorTest {
         patient.addRecord(100.0, "SystolicPressure", 1000);
          patient.addRecord(115.0, "SystolicPressure", 2000);
          patient.addRecord(130.0, "SystolicPressure", 3000);
-        AlertGenerator generator = new AlertGenerator(new DataStorage());
+        AlertGenerator generator = new AlertGenerator(DataStorage.getInstance());
         generator.evaluateData(patient);
         List <Alert> alerts = generator.getTriggeredAlerts();
         assertTrue(alerts.stream().anyMatch( a-> a.getCondition().equals("Increasing Blood Pressure Trend")));
@@ -48,7 +48,7 @@ public class AlertGeneratorTest {
     void testLowBloodSaturation(){
         Patient patient = new Patient(1);
         patient.addRecord(88.0, "Saturation", 1000);
-        AlertGenerator generator = new AlertGenerator(new DataStorage());
+        AlertGenerator generator = new AlertGenerator(DataStorage.getInstance());
         generator.evaluateData(patient);
         List <Alert> alerts = generator.getTriggeredAlerts();
         assertTrue(alerts.stream().anyMatch( a-> a.getCondition().equals("Low Blood Saturation")));
@@ -58,7 +58,7 @@ public class AlertGeneratorTest {
         Patient patient = new Patient(1);
         patient.addRecord(98.0, "Saturation", 1000);
         patient.addRecord(92.0, "Saturation", 200000);
-        AlertGenerator generator = new AlertGenerator(new DataStorage());
+        AlertGenerator generator = new AlertGenerator(DataStorage.getInstance());
         generator.evaluateData(patient);
         List <Alert> alerts = generator.getTriggeredAlerts();
         assertTrue(alerts.stream().anyMatch( a-> a.getCondition().equals("Rapid Blood Saturation Drop")));
@@ -69,7 +69,7 @@ public class AlertGeneratorTest {
         Patient patient = new Patient(1);
         patient.addRecord(85.0, "SystolicPressure", 1000);
         patient.addRecord(88.0, "Saturation", 1000);
-        AlertGenerator generator = new AlertGenerator(new DataStorage());
+        AlertGenerator generator = new AlertGenerator(DataStorage.getInstance());
         generator.evaluateData(patient);
         List <Alert> alerts = generator.getTriggeredAlerts();
         assertTrue(alerts.stream().anyMatch( a-> a.getCondition().equals("Hypotensive Hypoxemia")));

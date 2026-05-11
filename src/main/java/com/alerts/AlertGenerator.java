@@ -3,6 +3,9 @@ package com.alerts;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.alerts.factory.BloodPressureAlertFactory;
+import com.alerts.factory.BloodOxygenAlertFactory;
+import com.alerts.factory.ECGAlertFactory;
 import com.data_management.DataStorage;
 import com.data_management.Patient;
 import com.data_management.PatientRecord;
@@ -14,8 +17,20 @@ import com.data_management.PatientRecord;
  * it against specific health criteria.
  */
 public class AlertGenerator {
+
     private DataStorage dataStorage;
     private List<Alert> triggeredAlerts = new ArrayList<>();
+
+
+    //FACTORIES
+    private final BloodPressureAlertFactory bloodPressureFactory =
+    new BloodPressureAlertFactory();
+
+    private final BloodOxygenAlertFactory bloodOxygenFactory =
+    new BloodOxygenAlertFactory();
+
+    private final ECGAlertFactory ecgFactory =
+    new ECGAlertFactory();
 
     /**
      * Constructs an {@code AlertGenerator} with a specified {@code DataStorage}.
@@ -45,16 +60,27 @@ public class AlertGenerator {
         for(PatientRecord record : records){
             if(record.getRecordType().equals("SystolicPressure")){
                 double value = record.getMeasurementValue();
+
                 if(value >180 || value <90){
-                    triggerAlert(new Alert(String.valueOf(patient.getPatientId()),
-                      "Critical Systolic Blood Pressure", record.getTimestamp()));
+                    triggerAlert(
+                            bloodPressureFactory.createAlert(
+                                    String.valueOf(patient.getPatientId()),
+                                    "Critical Systolic Blood Pressure",
+                                    record.getTimestamp()
+                            ) 
+                        );
                 }
             }
             if(record.getRecordType().equals("DiastolicPressure")){
                 double value2 = record.getMeasurementValue();
                 if(value2>120 || value2<60){
-                    triggerAlert(new Alert(String.valueOf(patient.getPatientId())
-                    ,"Critical Diastolic Blood Pressure",record.getTimestamp()));
+                    triggerAlert(
+                            bloodPressureFactory.createAlert(
+                                    String.valueOf(patient.getPatientId()),
+                                    "Critical Diastolic Blood Pressure",
+                                    record.getTimestamp()
+                            )
+                        );
                 }
             }
         }
@@ -72,13 +98,22 @@ public class AlertGenerator {
         double third = systolicRecords.get(i).getMeasurementValue();
 
         if((second - first >10) && (third - second >10)){ 
-            triggerAlert(new Alert(String.valueOf(patient.getPatientId()),
-        "Increasing Blood Pressure Trend",systolicRecords.get(i).getTimestamp()));
+            triggerAlert(
+                        bloodPressureFactory.createAlert(
+                                String.valueOf(patient.getPatientId()),
+                                "Increasing Blood Pressure Trend",
+                                systolicRecords.get(i).getTimestamp()
+                        )
+                    );
          }
         if((first- second > 10) && (second - third >10)){ 
-            triggerAlert(new Alert(String.valueOf(patient.getPatientId()),
-        "Decreasing Blood Pressure Trend",systolicRecords.get(i).getTimestamp()
-             ));
+            triggerAlert(
+                        bloodPressureFactory.createAlert(
+                                String.valueOf(patient.getPatientId()),
+                                "Decreasing Blood Pressure Trend",
+                                systolicRecords.get(i).getTimestamp()
+                        )
+                );
             }
          }
 
@@ -94,21 +129,35 @@ public class AlertGenerator {
         double third = diastolicRecords.get(i).getMeasurementValue();
 
         if((second - first >10) && (third - second >10)){ 
-            triggerAlert(new Alert(String.valueOf(patient.getPatientId()),
-        "Increasing Diastolic Trend",diastolicRecords.get(i).getTimestamp()));
+            triggerAlert(
+                        bloodPressureFactory.createAlert(
+                                String.valueOf(patient.getPatientId()),
+                                "Increasing Diastolic Trend",
+                                diastolicRecords.get(i).getTimestamp()
+                        )
+                );
          }
         if((first- second > 10) && (second - third >10)){ 
-            triggerAlert(new Alert(String.valueOf(patient.getPatientId()),
-        "Decreasing Diastolic Trend",diastolicRecords.get(i).getTimestamp()
-             ));
+                            triggerAlert(
+                        bloodPressureFactory.createAlert(
+                                String.valueOf(patient.getPatientId()),
+                                "Decreasing Diastolic Trend",
+                                diastolicRecords.get(i).getTimestamp()
+                        )
+                );
             }
          }
          for(PatientRecord record:records){
             if(record.getRecordType().equals("Saturation")){
                 double value = record.getMeasurementValue();
                   if(value<92){
-                    triggerAlert(new Alert(String.valueOf(patient.getPatientId()),
-                     "Low Blood Saturation",record.getTimestamp()));
+                   triggerAlert(
+                            bloodOxygenFactory.createAlert(
+                                    String.valueOf(patient.getPatientId()),
+                                    "Low Blood Saturation",
+                                    record.getTimestamp()
+                            )
+                    );
                   }
                }
             }
@@ -131,7 +180,13 @@ public class AlertGenerator {
        long previousTime= saturationRecords.get(j).getTimestamp();
        if(currentTime - previousTime <= 600000){
         if(previous -current >= 5){
-            triggerAlert(new Alert(String.valueOf(patient.getPatientId()),"Rapid Blood Saturation Drop" , currentTime));
+            triggerAlert(
+                                bloodOxygenFactory.createAlert(
+                                        String.valueOf(patient.getPatientId()),
+                                        "Rapid Blood Saturation Drop",
+                                        currentTime
+                                )
+                        );
         }
        }else{
         break;
@@ -151,9 +206,14 @@ public class AlertGenerator {
         }
        }
        if(lowSystolic &&lowSaturation){
-        triggerAlert(new Alert(String.valueOf(patient.getPatientId()),"Hypotensive Hypoxemia" , alertTime));
+        triggerAlert(
+                    bloodPressureFactory.createAlert(
+                            String.valueOf(patient.getPatientId()),
+                            "Hypotensive Hypoxemia",
+                            alertTime
+                    )
+            );
        }
-
        //EGG alert
        List<PatientRecord> ecgRecords = new ArrayList<>();
         for(PatientRecord record :records){
@@ -169,11 +229,16 @@ public class AlertGenerator {
                 sum -=ecgRecords.get(i-windowSize).getMeasurementValue();
             double average = sum / windowSize;
             if(ecgRecords.get(i).getMeasurementValue() > average *2){
-           triggerAlert(new Alert(String.valueOf(patient.getPatientId()),"Abnormal ECG" , ecgRecords.get(i).getTimestamp()));
-
+           triggerAlert(
+                            ecgFactory.createAlert(
+                                    String.valueOf(patient.getPatientId()),
+                                    "Abnormal ECG",
+                                    ecgRecords.get(i).getTimestamp()
+                            )
+                    );
                 }
                }
-            }
+         }
 
 
 

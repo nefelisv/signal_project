@@ -70,5 +70,5 @@ UML class diagrams can be found in the
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ##Project members
-- Student ID 6382687
-
+- Student ID 6382687 - Nefeli Savva
+Maria Zawadzka - I6373924

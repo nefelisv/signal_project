@@ -24,6 +24,12 @@ public class DataStorage {
         this.patientMap = new HashMap<>();
     }
 
+    /**
+ * Returns the single shared DataStorage instance.
+ *
+ * @return the singleton DataStorage instance
+ */
+
     public static DataStorage getInstance() {
     if (instance == null) {
         instance = new DataStorage();

@@ -29,8 +29,18 @@ public class HealthDataSimulator {
 
     private static HealthDataSimulator instance;
 
+    /**
+ * Private constructor to prevent creating multiple simulator instances.
+ */
+
     private HealthDataSimulator() {
     }
+
+    /**
+ * Returns the single shared HealthDataSimulator instance.
+ *
+ * @return the singleton HealthDataSimulator instance
+ */
 
     public static HealthDataSimulator getInstance() {
         if (instance == null) {

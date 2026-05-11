@@ -1,0 +1,122 @@
+package com.alerts.strategy;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.alerts.Alert;
+import com.alerts.factory.BloodPressureAlertFactory;
+import com.data_management.Patient;
+import com.data_management.PatientRecord;
+
+public class BloodPressureStrategy implements AlertStrategy {
+
+    private final BloodPressureAlertFactory bloodPressureFactory =
+            new BloodPressureAlertFactory();
+
+    @Override
+    public List<Alert> checkAlert(Patient patient, List<PatientRecord> records) {
+
+        List<Alert> alerts = new ArrayList<>();
+
+        for (PatientRecord record : records) {
+
+            if (record.getRecordType().equals("SystolicPressure")) {
+                double value = record.getMeasurementValue();
+
+                if (value > 180 || value < 90) {
+                    alerts.add(
+                            bloodPressureFactory.createAlert(
+                                    String.valueOf(patient.getPatientId()),
+                                    "Critical Systolic Blood Pressure",
+                                    record.getTimestamp()
+                            )
+                    );
+                }
+            }
+
+            if (record.getRecordType().equals("DiastolicPressure")) {
+                double value = record.getMeasurementValue();
+
+                if (value > 120 || value < 60) {
+                    alerts.add(
+                            bloodPressureFactory.createAlert(
+                                    String.valueOf(patient.getPatientId()),
+                                    "Critical Diastolic Blood Pressure",
+                                    record.getTimestamp()
+                            )
+                    );
+                }
+            }
+        }
+
+        List<PatientRecord> systolicRecords = new ArrayList<>();
+
+        for (PatientRecord record : records) {
+            if (record.getRecordType().equals("SystolicPressure")) {
+                systolicRecords.add(record);
+            }
+        }
+
+        for (int i = 2; i < systolicRecords.size(); i++) {
+            double first = systolicRecords.get(i - 2).getMeasurementValue();
+            double second = systolicRecords.get(i - 1).getMeasurementValue();
+            double third = systolicRecords.get(i).getMeasurementValue();
+
+            if ((second - first > 10) && (third - second > 10)) {
+                alerts.add(
+                        bloodPressureFactory.createAlert(
+                                String.valueOf(patient.getPatientId()),
+                                "Increasing Blood Pressure Trend",
+                                systolicRecords.get(i).getTimestamp()
+                        )
+                );
+            }
+
+            if ((first - second > 10) && (second - third > 10)) {
+                alerts.add(
+                        bloodPressureFactory.createAlert(
+                                String.valueOf(patient.getPatientId()),
+                                "Decreasing Blood Pressure Trend",
+                                systolicRecords.get(i).getTimestamp()
+                        )
+                );
+            }
+        }
+
+        List<PatientRecord> diastolicRecords = new ArrayList<>();
+
+        for (PatientRecord record : records) {
+            if (record.getRecordType().equals("DiastolicPressure")) {
+                diastolicRecords.add(record);
+            }
+        }
+
+        for (int i = 2; i < diastolicRecords.size(); i++) {
+            double first = diastolicRecords.get(i - 2).getMeasurementValue();
+            double second = diastolicRecords.get(i - 1).getMeasurementValue();
+            double third = diastolicRecords.get(i).getMeasurementValue();
+
+            if ((second - first > 10) && (third - second > 10)) {
+                alerts.add(
+                        bloodPressureFactory.createAlert(
+                                String.valueOf(patient.getPatientId()),
+                                "Increasing Diastolic Trend",
+                                diastolicRecords.get(i).getTimestamp()
+                        )
+                );
+            }
+
+            if ((first - second > 10) && (second - third > 10)) {
+                alerts.add(
+                        bloodPressureFactory.createAlert(
+                                String.valueOf(patient.getPatientId()),
+                                "Decreasing Diastolic Trend",
+                                diastolicRecords.get(i).getTimestamp()
+                        )
+                );
+            }
+        }
+
+        return alerts;
+    }
+}

@@ -1,0 +1,60 @@
+package com.alerts.strategy;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.alerts.Alert;
+import com.alerts.factory.ECGAlertFactory;
+import com.data_management.Patient;
+import com.data_management.PatientRecord;
+
+public class HeartRateStrategy implements AlertStrategy {
+
+    private final ECGAlertFactory ecgFactory =
+            new ECGAlertFactory();
+
+    @Override
+    public List<Alert> checkAlert(Patient patient, List<PatientRecord> records) {
+
+        List<Alert> alerts = new ArrayList<>();
+
+        List<PatientRecord> ecgRecords = new ArrayList<>();
+
+        for (PatientRecord record : records) {
+
+            if (record.getRecordType().equals("EcG")) {
+                ecgRecords.add(record);
+            }
+        }
+
+        double sum = 0;
+        int windowSize = 10;
+
+        for (int i = 0; i < ecgRecords.size(); i++) {
+
+            sum += ecgRecords.get(i).getMeasurementValue();
+
+            if (i >= windowSize) {
+
+                sum -= ecgRecords.get(i - windowSize)
+                        .getMeasurementValue();
+
+                double average = sum / windowSize;
+
+                if (ecgRecords.get(i).getMeasurementValue()
+                        > average * 2) {
+
+                    alerts.add(
+                            ecgFactory.createAlert(
+                                    String.valueOf(patient.getPatientId()),
+                                    "Abnormal ECG",
+                                    ecgRecords.get(i).getTimestamp()
+                            )
+                    );
+                }
+            }
+        }
+
+        return alerts;
+    }
+}
